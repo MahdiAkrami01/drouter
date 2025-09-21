@@ -47,18 +47,41 @@ sudo systemctl start drouter
 
 Add labels to your Docker containers to configure static routes:
 
+### Docker Compose
+
 ```yaml
 version: '3.8'
 services:
   app:
     image: nginx
     labels:
+      # Single line with semicolon separators
       drouter.routes.ipv4: "10.0.0.0/8 via 172.17.0.1;192.168.0.0/16 via 172.17.0.2"
       drouter.routes.ipv6: "2001:db8::/32 via fe80::1"
       drouter.routes.delay: "2"  # Optional: wait 2 seconds before adding routes
 ```
 
-Or with `docker run`:
+Or use multi-line YAML format for better readability:
+
+```yaml
+version: '3.8'
+services:
+  app:
+    image: nginx
+    labels:
+      # Multi-line format (newline separated)
+      drouter.routes.ipv4: |
+        10.0.0.0/8 via 172.17.0.1
+        192.168.0.0/16 via 172.17.0.2
+        172.16.0.0/12 via 172.17.0.3
+      drouter.routes.ipv6: |
+        2001:db8::/32 via fe80::1
+        fd00::/8 via fe80::2
+```
+
+### Docker CLI
+
+With `docker run`:
 
 ```bash
 docker run -d \
@@ -81,7 +104,8 @@ docker run -d \
 Routes use standard iproute2 syntax:
 - IPv4: `<destination> via <gateway>`
 - IPv6: `<destination> via <gateway>`
-- Multiple routes: separate with semicolons
+- Multiple routes: Use semicolons OR newlines as separators
+- Both formats work: `route1;route2` or multi-line with one route per line
 
 ## Configuration
 

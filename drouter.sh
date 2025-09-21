@@ -192,6 +192,10 @@ process_container_routes() {
     
     # Process IPv4 routes
     if [ -n "$routes_v4" ]; then
+        # Support both semicolon and newline separators
+        # Replace newlines with semicolons for consistent processing
+        routes_v4=$(echo "$routes_v4" | tr '\n' ';')
+        
         IFS=';' read -ra ROUTE_ARRAY <<< "$routes_v4"
         for route in "${ROUTE_ARRAY[@]}"; do
             # Trim whitespace
@@ -204,6 +208,10 @@ process_container_routes() {
     
     # Process IPv6 routes
     if [ -n "$routes_v6" ]; then
+        # Support both semicolon and newline separators
+        # Replace newlines with semicolons for consistent processing
+        routes_v6=$(echo "$routes_v6" | tr '\n' ';')
+        
         IFS=';' read -ra ROUTE_ARRAY <<< "$routes_v6"
         for route in "${ROUTE_ARRAY[@]}"; do
             # Trim whitespace
