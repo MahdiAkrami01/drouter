@@ -102,6 +102,7 @@ docker run -d \
 ### Route Format
 
 Routes use standard iproute2 syntax:
+
 - IPv4: `<destination> via <gateway>`
 - IPv6: `<destination> via <gateway>`
 - Multiple routes: Use semicolons OR newlines as separators
@@ -164,16 +165,19 @@ sudo journalctl -u drouter | grep <container>
 ### Routes Not Added
 
 1. Check container has the correct labels:
+
    ```bash
    docker inspect <container> | jq '.[] | .Config.Labels'
    ```
 
 2. Verify service is running:
+
    ```bash
    sudo systemctl status drouter
    ```
 
 3. Check for errors in logs:
+
    ```bash
    sudo journalctl -u drouter -n 100 | grep ERROR
    ```

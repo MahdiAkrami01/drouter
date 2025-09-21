@@ -254,28 +254,36 @@ main() {
     
     # Monitor events
     log_info "Monitoring Docker events..."
-    
-    # Monitor start, restart, unpause events
+
+    # Monitor start events for containers with drouter labels
     # Note: Labels cannot be changed on running containers, so no need to monitor update events
-    docker events \
-        --filter "label=$LABEL_KEY_V4" \
-        --filter "label=$LABEL_KEY_V6" \
-        --filter "event=start" \
-        --filter "event=restart" \
-        --filter "event=unpause" \
-        --format '{{json .}}' | while read -r event; do
-        
+    # Using separate processes for each label to implement OR logic between labels
+    {
+        docker events \
+            --filter "label=$LABEL_KEY_V4" \
+            --filter "event=start" \
+            --format '{{json .}}' &
+
+        docker events \
+            --filter "label=$LABEL_KEY_V6" \
+            --filter "event=start" \
+            --format '{{json .}}' &
+
+        wait
+    } | while read -r event; do
+
         if [ -z "$event" ]; then
             continue
         fi
-        
+
         local action container
         action=$(echo "$event" | jq -r '.Action')
         container=$(echo "$event" | jq -r '.Actor.Attributes.name // .Actor.ID[0:12]')
-        
+
         log_debug "Received event: $action for container: $container"
-        
+
         # Process container routes (delay is handled inside the function)
+        # Note: route_exists() prevents duplicate routes if container has both labels
         process_container_routes "$container" "$action"
     done
 }
