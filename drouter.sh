@@ -21,7 +21,7 @@ DEFAULT_ROUTE_DELAY="${DEFAULT_ROUTE_DELAY:-0}"  # Default delay before adding r
 log() {
     local level=$1
     shift
-    echo "$(date -Iseconds) [$level] $*" | systemd-cat -t drouter -p "${level,,}"
+    echo "$(date -Iseconds) [$level] $*"
 }
 
 log_debug() { [[ "$LOG_LEVEL" == "DEBUG" ]] && log DEBUG "$@"; }
