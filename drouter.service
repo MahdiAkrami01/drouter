@@ -1,0 +1,46 @@
+[Unit]
+Description=drouter - Dynamic Route Injection for Docker Containers
+Documentation=https://github.com/lanrat/drouter
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+# Restart if Docker restarts
+BindsTo=docker.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+
+# Environment variables for configuration
+Environment="LOG_LEVEL=INFO"
+Environment="DEFAULT_ROUTE_DELAY=0"
+Environment="RETRY_ATTEMPTS=3"
+Environment="RETRY_DELAY=1"
+
+# Ensure Docker is fully ready before starting
+ExecStartPre=/bin/bash -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
+
+ExecStart=/usr/local/bin/drouter
+
+# Run as root to access network namespaces
+User=root
+Group=root
+
+# Security hardening (still allows necessary operations)
+NoNewPrivileges=false
+PrivateDevices=false
+ProtectKernelTunables=false
+ProtectKernelModules=true
+ProtectControlGroups=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=drouter
+
+[Install]
+WantedBy=multi-user.target
